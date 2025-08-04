@@ -38,11 +38,16 @@ async def join(ctx):
         await ctx.send("You're not in a voice channel.")
 
 @bot.command()
-async def play(ctx, url):
+async def play(ctx, *, query):
     if not ctx.voice_client:
         await ctx.invoke(bot.get_command('join'))
 
-    stream_url = get_audio_stream_url(url)
+    stream_url = get_audio_stream_url(query)
+
+    if not stream_url:
+        await ctx.send("Could not retrieve audio. The video may be restricted or invalid.")
+        return
+
     vc = ctx.voice_client
 
     ffmpeg_options = {
@@ -98,3 +103,4 @@ keep_alive()
 # Use token from environment variable
 
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+
