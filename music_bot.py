@@ -9,15 +9,24 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-def get_audio_stream_url(url):
+def get_audio_stream_url(query):
     ydl_opts = {
         'format': 'bestaudio',
         'quiet': True,
-        'no_warnings': True,
+        'default_search': 'ytsearch',
+        'noplaylist': True
     }
+
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=False)
-        return info['url']
+        try:
+            # ytsearch automatically fetches the first result
+            info = ydl.extract_info(query, download=False)
+            if 'entries' in info:
+                info = info['entries'][0]  # take first video from search results
+            return info['url']
+        except Exception as e:
+            print(f"yt_dlp error: {e}")
+            return None
 
 @bot.command()
 async def join(ctx):
@@ -87,4 +96,5 @@ async def leave(ctx):
 keep_alive()
 
 # Use token from environment variable
+
 bot.run(os.getenv("DISCORD_BOT_TOKEN"))
